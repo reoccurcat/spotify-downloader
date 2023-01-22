@@ -237,6 +237,11 @@ class Downloader:
                         songmeta.name,
                         songmeta.album_id,
                     )
+                else:
+                    logger.debug(
+                        "Song %d had album ID None, skipping...",
+                        songmeta.name,
+                    )
             albums = set(str(id) for id in album_ids)
             logger.info(
                 "Fetching %d album%s", len(albums), "s" if len(albums) > 1 else ""
