@@ -326,6 +326,8 @@ class SongList:
         - The Album object.
         """
 
+        print('Attempting to get album')
+
         metadata = cls.get_metadata(url)
 
         urls = cls.get_urls(url)
