@@ -228,9 +228,7 @@ class Downloader:
 
         if self.settings["fetch_albums"]:
             album_ids = []
-            logger.info(
-                'Fetching albums... this may take a while'
-            )
+            logger.info("Fetching albums... this may take a while")
             for song in songs:
                 songmeta = Song.from_url(song.url)
                 if songmeta.album_id is not None:
