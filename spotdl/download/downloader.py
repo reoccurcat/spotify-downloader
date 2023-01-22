@@ -228,12 +228,9 @@ class Downloader:
 
         if self.settings["fetch_albums"]:
             album_ids = []
-            logger.info("Fetching albums... this may take a while")
+            #logger.info("Fetching albums... this may take a while")
             for song in songs:
-                print(song)
-                sys.exit()
-            for song in songs:
-                logger.debug('Got this far')
+                print('Got this far')
                 print(song.url)
                 print(Song.from_url(str(song.url)))
                 songmeta = Song.from_url(song.url)
