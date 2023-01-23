@@ -118,6 +118,79 @@ class Song:
             if raw_album_meta["images"]
             else None,
         )
+    
+    @classmethod
+    def from_url_album(cls, songs):
+        songsmeta = []
+        """
+        Creates a Song object from a URL.
+
+        ### Arguments
+        - url: The URL of the song.
+
+        ### Returns
+        - The Song object.
+        """
+
+        # query spotify for song, artist, album details
+        spotify_client = SpotifyClient()
+        print("spotify client init")
+        for song in songs:
+            url = song.url
+            if "open.spotify.com" not in url or "track" not in url:
+                raise SongError(f"Invalid URL: {url}")
+
+            # get track info
+            raw_track_meta = spotify_client.track(url)
+            print(raw_track_meta)
+
+            if raw_track_meta is None:
+                raise SongError(
+                    "Couldn't get metadata, check if you have passed correct track id"
+                )
+
+            if raw_track_meta["duration_ms"] == 0 or raw_track_meta["name"].strip() == "":
+                raise SongError(f"Track no longer exists: {url}")
+
+            # get artist info
+            primary_artist_id = raw_track_meta["artists"][0]["id"]
+            raw_artist_meta: Dict[str, Any] = spotify_client.artist(primary_artist_id)  # type: ignore
+
+            # get album info
+            album_id = raw_track_meta["album"]["id"]
+            raw_album_meta: Dict[str, Any] = spotify_client.album(album_id)  # type: ignore
+
+            # create song object
+            songsmeta.append(cls(
+                name=raw_track_meta["name"],
+                artists=[artist["name"] for artist in raw_track_meta["artists"]],
+                artist=raw_track_meta["artists"][0]["name"],
+                album_id=album_id,
+                album_name=raw_album_meta["name"],
+                album_artist=raw_album_meta["artists"][0]["name"],
+                copyright_text=raw_album_meta["copyrights"][0]["text"]
+                if raw_album_meta["copyrights"]
+                else None,
+                genres=raw_album_meta["genres"] + raw_artist_meta["genres"],
+                disc_number=raw_track_meta["disc_number"],
+                disc_count=int(raw_album_meta["tracks"]["items"][-1]["disc_number"]),
+                duration=raw_track_meta["duration_ms"] / 1000,
+                year=int(raw_album_meta["release_date"][:4]),
+                date=raw_album_meta["release_date"],
+                track_number=raw_track_meta["track_number"],
+                tracks_count=raw_album_meta["total_tracks"],
+                isrc=raw_track_meta.get("external_ids", {}).get("isrc"),
+                song_id=raw_track_meta["id"],
+                explicit=raw_track_meta["explicit"],
+                publisher=raw_album_meta["label"],
+                url=raw_track_meta["external_urls"]["spotify"],
+                cover_url=max(
+                    raw_album_meta["images"], key=lambda i: i["width"] * i["height"]
+                )["url"]
+                if raw_album_meta["images"]
+                else None,
+            ))
+        return songsmeta
 
     @staticmethod
     def search(search_term: str):

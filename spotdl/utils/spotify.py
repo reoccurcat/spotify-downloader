@@ -154,7 +154,6 @@ class SpotifyClient(Spotify, metaclass=Singleton):
         Overrides the get method of the SpotifyClient.
         Allows us to cache requests
         """
-
         use_cache = not self.no_cache  # type: ignore # pylint: disable=E1101
 
         if args:
@@ -168,14 +167,16 @@ class SpotifyClient(Spotify, metaclass=Singleton):
             cache_key = dumps(key_obj)
             if self.cache.get(cache_key) is not None:
                 return self.cache[cache_key]
-
+            
         # Wrap in a try-except and retry up to `retries` times.
         response = None
         retries = self.max_retries  # type: ignore # pylint: disable=E1101
         while response is None:
             try:
+                print('none response')
                 response = self._internal_call("GET", url, payload, kwargs)
             except (requests.exceptions.Timeout, requests.ConnectionError) as exc:
+                print('exception none response')
                 retries -= 1
                 if retries <= 0:
                     raise exc
